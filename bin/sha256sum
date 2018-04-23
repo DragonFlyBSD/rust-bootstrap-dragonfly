@@ -1,0 +1,2 @@
+#!/bin/sh
+/usr/local/bin/shasum -a 256 $1
