@@ -107,6 +107,7 @@ clean() {
 	rm -rf $DEST
 }
 
+# filename cachepath downloadpath url
 download() {
 	file=`echo $1 | tr  ".-" "_"`
 	eval "expected_cksum=\$SHA256_${file}"
@@ -115,15 +116,15 @@ download() {
 		exit 1
 	fi
 
-	if [ -f /usr/distfiles/$1 ]; then
-		echo "$1 exists in /usr/distfiles"
-		cp /usr/distfiles/$1 .
+	if [ -f $2/$1 ]; then
+		echo "$1 exists in $2"
+		cp $2/$1 $3/$1
 	else
-		echo "download: $1 from $2"
-		fetch -o $1 $2/$1
+		echo "download: $1 from $4 and store into $3"
+		fetch -o $3/$1 $4/$1
 	fi
 
-	cksum=`sha256 -q $1`
+	cksum=`sha256 -q $3/$1`
 
 	if [ "${cksum}" = "${expected_cksum}" ]; then
 		echo "checksum ok for $1"
@@ -147,7 +148,9 @@ fixup-vendor-patch() {
 
 extract() {
 	mkdir -p $DEST/tmp $DEST/bootstrap
-	cd $DEST
+
+	download rustc-$RUST_VERSION-src.tar.gz /usr/distfiles $DEST ${RUST_DIST_SERVER}/dist || exit 1
+	tar xvzf $DEST/rustc-$RUST_VERSION-src.tar.gz -C ${DEST} 2>&1 | wc -l
 
 	for component in ${COMPONENTS}; do
 		echo "INSTALL COMPONENT: ${component}"
@@ -155,10 +158,6 @@ extract() {
 		# install.sh needs bash, but used !/bin/bash which does not exist on DragonFly
 		${BASH} $DEST/tmp/$component-${TARGET}/install.sh --prefix=$DEST/bootstrap
 	done
-
-
-	(cd $DEST && download rustc-$RUST_VERSION-src.tar.gz ${RUST_DIST_SERVER}/dist) || exit 1
-	tar xvzf $DEST/rustc-$RUST_VERSION-src.tar.gz 2>&1 | wc -l
 }
 
 prepatch() {
