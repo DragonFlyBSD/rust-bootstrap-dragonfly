@@ -79,7 +79,7 @@ DEST_INSTALL=$DEST/install
 COMPONENTS="cargo-${CARGO_BOOTSTRAP_VERSION} rust-std-${RUSTC_BOOTSTRAP_VERSION} rustc-${RUSTC_BOOTSTRAP_VERSION}"
 
 # set path
-export PATH=/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin
+export PATH=/bin:/usr/bin:/usr/local/bin
 
 # we need these to avoid patching the sources for sha256sum
 export PATH=$PATH:$BASE/../bin
@@ -147,14 +147,14 @@ fixup-vendor-patch() {
 }
 
 extract() {
-	mkdir -p $DEST/tmp $DEST/bootstrap
+	mkdir -p $DEST/tmp $DEST/bootstrap ${DEST_INSTALL}
 
 	download rustc-$RUST_VERSION-src.tar.gz /usr/distfiles $DEST ${RUST_DIST_SERVER}/dist || exit 1
 	tar xvzf $DEST/rustc-$RUST_VERSION-src.tar.gz -C ${DEST} 2>&1 | wc -l
 
 	for component in ${COMPONENTS}; do
 		echo "INSTALL COMPONENT: ${component}"
-		tar xvzf ${BOOTSTRAP_DIR}/$component-${TARGET}.tar.xz -C $DEST/tmp
+		tar xvzf ${BOOTSTRAP_DIR}/$component-${TARGET}.tar.xz -C $DEST/tmp  || exit 1
 		# install.sh needs bash, but used !/bin/bash which does not exist on DragonFly
 		${BASH} $DEST/tmp/$component-${TARGET}/install.sh --prefix=$DEST/bootstrap
 	done
@@ -168,6 +168,18 @@ prepatch() {
 			patch < $patch
 		done
 	fi
+}
+
+create-config() {
+	cat $BASE/config.toml.template | \
+		sed -e "s:%%CARGO%%:${BOOTSTRAP_COMPILER_BASE}/bin/cargo:g" | \
+		sed -e "s:%%RUSTC%%:${BOOTSTRAP_COMPILER_BASE}/bin/rustc:g" | \
+		sed -e "s:%%PREFIX%%:${DEST_INSTALL}:g" | \
+		sed -e "s:%%CC%%:${CONF_CC}:g" | \
+		sed -e "s:%%CXX%%:${CONF_CXX}:g" | \
+		sed -e "s:%%LINKER%%:${CONF_LINKER}:g" | \
+		sed -e "s:%%LLVM_CONFIG%%:${LLVM_ROOT}/bin/llvm-config:g" > \
+		$DEST/rustc-$RUST_VERSION-src/config.toml
 }
 
 config() {
@@ -198,6 +210,18 @@ dist() {
 
 inst() {
 	mk install
+}
+
+xbuild() {
+	cd $DEST/rustc-$RUST_VERSION-src && python x.py build --verbose --config ./config.toml --jobs 10
+}
+
+xdist() {
+	cd $DEST/rustc-$RUST_VERSION-src && python x.py dist --verbose --config ./config.toml
+}
+
+xinst() {
+	cd $DEST/rustc-$RUST_VERSION-src && python x.py install --verbose --config ./config.toml
 }
 
 info() {
