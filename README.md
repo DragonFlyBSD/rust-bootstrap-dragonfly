@@ -7,7 +7,7 @@ Boostrapping the Rust compiler on DragonFlyBSD (Scripts only, no binaries)
 * devel/llvm50
 * (devel/llvm60)
 * gcc7
-* lang/python27
+* lang/python
 * devel/cmake
 * security/libssh
 * perl5 (for shasum)
