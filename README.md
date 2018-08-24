@@ -17,5 +17,6 @@ Boostrapping the Rust compiler on DragonFlyBSD (Scripts only, no binaries)
 Currently, only Rust >= 1.28.0 can be build, due to changing where
 the bootstrap files are fetched. 
 
+	mkdir -p $HOME/rust
 	cd $HOME/rust && git clone https://github.com/mneumann/rust-bootstrap-dragonfly.git
 	cd $HOME/rust/rust-bootstrap-dragonfly/1.28.0 && ./build.sh $HOME/rust/build-1.28.0
