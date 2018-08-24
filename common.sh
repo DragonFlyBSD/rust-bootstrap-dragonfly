@@ -13,7 +13,6 @@
 # Optional:
 #
 #   RUST_DIST_SERVER
-#   BOOTSTRAP_DIR		the directory where the bootstrap compiler can be found
 #   ADDITIONAL_CONFIGURE_FLAGS
 
 if [ "${RUST_DIST_SERVER}" = "" ]; then
@@ -66,17 +65,11 @@ else
 	LLVM_ROOT_OPT="--llvm-root=${LLVM_ROOT}"
 fi
 
-if [ "${BOOTSTRAP_DIR}" = "" ]; then
-	BOOTSTRAP_DIR=$BASE/bootstrap
-else
-	echo "Using non-default BOOTSTRAP_DIR=${BOOTSTRAP_DIR}"
-fi
-
-
 BASH=bash
 TARGET=x86_64-unknown-dragonfly
 DEST_INSTALL=$DEST/install
 COMPONENTS="cargo-${CARGO_BOOTSTRAP_VERSION} rust-std-${RUSTC_BOOTSTRAP_VERSION} rustc-${RUSTC_BOOTSTRAP_VERSION}"
+BOOTSTRAP_URL="http://leaf.dragonflybsd.org/~mneumann/rust/bootstrap/${RUSTC_BOOTSTRAP_VERSION}"
 
 # set path
 export PATH=/bin:/usr/bin:/usr/local/bin
@@ -153,8 +146,11 @@ extract() {
 	tar xvzf $DEST/rustc-$RUST_VERSION-src.tar.gz -C ${DEST} 2>&1 | wc -l
 
 	for component in ${COMPONENTS}; do
+		echo "DOWNLOAD COMPONENT: ${component}"
+		download $component-${TARGET}.tar.xz /usr/distfiles $DEST ${BOOTSTRAP_URL}
+
 		echo "INSTALL COMPONENT: ${component}"
-		tar xvzf ${BOOTSTRAP_DIR}/$component-${TARGET}.tar.xz -C $DEST/tmp  || exit 1
+		tar xvzf $DEST/$component-${TARGET}.tar.xz -C $DEST/tmp  || exit 1
 		# install.sh needs bash, but used !/bin/bash which does not exist on DragonFly
 		${BASH} $DEST/tmp/$component-${TARGET}/install.sh --prefix=$DEST/bootstrap
 	done
