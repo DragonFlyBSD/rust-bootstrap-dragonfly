@@ -69,7 +69,7 @@ BASH=bash
 TARGET=x86_64-unknown-dragonfly
 DEST_INSTALL=$DEST/install
 COMPONENTS="cargo-${CARGO_BOOTSTRAP_VERSION} rust-std-${RUSTC_BOOTSTRAP_VERSION} rustc-${RUSTC_BOOTSTRAP_VERSION}"
-BOOTSTRAP_URL="http://leaf.dragonflybsd.org/~mneumann/rust/bootstrap/${RUSTC_BOOTSTRAP_VERSION}"
+BOOTSTRAP_URL="http://www.ntecs.de/downloads/rust/${RUSTC_BOOTSTRAP_VERSION}"
 
 # set path
 export PATH=/bin:/usr/bin:/usr/local/bin
