@@ -71,6 +71,10 @@ DEST_INSTALL=$DEST/install
 COMPONENTS="cargo-${CARGO_BOOTSTRAP_VERSION} rust-std-${RUSTC_BOOTSTRAP_VERSION} rustc-${RUSTC_BOOTSTRAP_VERSION}"
 BOOTSTRAP_URL="http://www.ntecs.de/downloads/rust/${RUSTC_BOOTSTRAP_VERSION}"
 
+if [ "${CONFIGURE_CARGO_STATIC_FLAGS}" = "" ]; then
+	CONFIGURE_CARGO_STATIC_FLAGS=--enable-cargo-openssl-static
+fi
+
 # set path
 export PATH=/bin:/usr/bin:/usr/local/bin
 
@@ -182,7 +186,7 @@ config() {
 	cd $DEST/rustc-$RUST_VERSION-src
 	./configure \
 		--release-channel=${RELEASE_CHANNEL} \
-		--enable-cargo-openssl-static --enable-extended \
+		${CONFIGURE_CARGO_STATIC_FLAGS} --enable-extended \
 		--enable-vendor \
 		${ADDITIONAL_CONFIGURE_FLAGS} \
 		--enable-locked-deps --disable-jemalloc \
