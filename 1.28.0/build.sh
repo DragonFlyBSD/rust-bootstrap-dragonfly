@@ -7,6 +7,7 @@ RUST_VERSION=1.28.0
 BASE=`pwd`
 DEST=$1
 LLVM_ROOT=""
+ADDITIONAL_CONFIGURE_FLAGS="--disable-jemalloc"
 
 . ../checksums.sh
 . ../common.sh
