@@ -1,4 +1,4 @@
-#
+
 # Expected variables:
 #
 # * RUSTC_BOOTSTRAP_VERSION
@@ -69,7 +69,7 @@ BASH=bash
 TARGET=x86_64-unknown-dragonfly
 DEST_INSTALL=$DEST/install
 COMPONENTS="cargo-${CARGO_BOOTSTRAP_VERSION} rust-std-${RUSTC_BOOTSTRAP_VERSION} rustc-${RUSTC_BOOTSTRAP_VERSION}"
-BOOTSTRAP_URL="http://www.ntecs.de/downloads/rust/${RUSTC_BOOTSTRAP_VERSION}"
+BOOTSTRAP_URL="https://leaf.dragonflybsd.org/~tuxillo/archive/rust/${RUSTC_BOOTSTRAP_VERSION}"
 
 if [ "${CONFIGURE_CARGO_STATIC_FLAGS}" = "" ]; then
 	CONFIGURE_CARGO_STATIC_FLAGS=--enable-cargo-openssl-static
@@ -135,7 +135,7 @@ SHA256=sha256
 REINPLACE_CMD="sed -i.bak"
 
 fixup-vendor-patch() {
-	cd $DEST/rustc-$RUST_VERSION-src/src/vendor/$1
+	cd $DEST/rustc-$RUST_VERSION-src/vendor/$1
 	file=$2
 	old_checksum=`${SHA256} -q "${file}.orig"`
 	new_checksum=`${SHA256} -q "${file}"`
@@ -168,6 +168,7 @@ prepatch() {
 			patch < $patch
 		done
 	fi
+	find  $DEST/rustc-$RUST_VERSION-src -iname "*.orig" -type f -delete
 }
 
 create-config() {
@@ -189,10 +190,11 @@ config() {
 		${CONFIGURE_CARGO_STATIC_FLAGS} --enable-extended \
 		--enable-vendor \
 		${ADDITIONAL_CONFIGURE_FLAGS} \
-		--enable-locked-deps --disable-jemalloc \
+		--enable-locked-deps \
 		--local-rust-root=${BOOTSTRAP_COMPILER_BASE} \
 		--sysconfdir=${DEST_INSTALL}/etc \
 		--prefix=${DEST_INSTALL} \
+		--python=/usr/local/bin/python2.7 \
 		${LLVM_ROOT_OPT}
 }
 
@@ -213,15 +215,15 @@ inst() {
 }
 
 xbuild() {
-	cd $DEST/rustc-$RUST_VERSION-src && python x.py build --verbose --config ./config.toml --jobs 10
+	cd $DEST/rustc-$RUST_VERSION-src && python2.7 x.py build --verbose --config ./config.toml --jobs $(sysctl -n hw.ncpu)
 }
 
 xdist() {
-	cd $DEST/rustc-$RUST_VERSION-src && python x.py dist --verbose --config ./config.toml
+	cd $DEST/rustc-$RUST_VERSION-src && python2.7 x.py dist --verbose --config ./config.toml
 }
 
 xinst() {
-	cd $DEST/rustc-$RUST_VERSION-src && python x.py install --verbose --config ./config.toml
+	cd $DEST/rustc-$RUST_VERSION-src && python2.7 x.py install --verbose --config ./config.toml
 }
 
 info() {
