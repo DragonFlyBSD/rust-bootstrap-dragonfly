@@ -16,4 +16,8 @@ LLVM_ROOT=""
 . ../checksums.sh
 . ../common.sh
 
-RUN info clean extract prepatch config xbuild xdist inst 2>&1
+fixup-vendor() {
+        fixup-vendor-patch openssl-src src/lib.rs || exit 1
+}
+
+RUN info clean extract prepatch fixup-vendor config build dist inst 2>&1
