@@ -165,10 +165,9 @@ prepatch() {
 	if [ -d $BASE/patches ]; then
 		for patch in $BASE/patches/patch-*; do
 			echo $patch
-			patch < $patch
+			patch < $patch || exit 1
 		done
 	fi
-	find  $DEST/rustc-$RUST_VERSION-src -iname "*.orig" -type f -delete
 }
 
 create-config() {
