@@ -194,7 +194,7 @@ config() {
 		--local-rust-root=${BOOTSTRAP_COMPILER_BASE} \
 		--sysconfdir=${DEST_INSTALL}/etc \
 		--prefix=${DEST_INSTALL} \
-		--python=/usr/local/bin/python3.7 \
+		--python=/usr/local/bin/python \
 		${LLVM_ROOT_OPT}
 }
 
@@ -215,15 +215,15 @@ inst() {
 }
 
 xbuild() {
-	cd $DEST/rustc-$RUST_VERSION-src && python3.7 x.py build --verbose --config ./config.toml --jobs $(/sbin/sysctl -n hw.ncpu)
+	cd $DEST/rustc-$RUST_VERSION-src && python x.py build --verbose --config ./config.toml --jobs $(/sbin/sysctl -n hw.ncpu)
 }
 
 xdist() {
-	cd $DEST/rustc-$RUST_VERSION-src && python3.7 x.py dist --verbose --config ./config.toml
+	cd $DEST/rustc-$RUST_VERSION-src && python x.py dist --verbose --config ./config.toml
 }
 
 xinst() {
-	cd $DEST/rustc-$RUST_VERSION-src && python3.7 x.py install --verbose --config ./config.toml
+	cd $DEST/rustc-$RUST_VERSION-src && python x.py install --verbose --config ./config.toml
 }
 
 info() {
