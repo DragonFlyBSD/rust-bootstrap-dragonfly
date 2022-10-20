@@ -183,6 +183,8 @@ create-config() {
 		$DEST/rustc-$RUST_VERSION-src/config.toml
 }
 
+# Disable llvm static linking against libstdc++
+# https://github.com/rust-lang/rust/pull/94832
 config() {
 	cd $DEST/rustc-$RUST_VERSION-src
 	./configure \
@@ -195,6 +197,8 @@ config() {
 		--sysconfdir=${DEST_INSTALL}/etc \
 		--prefix=${DEST_INSTALL} \
 		--python=/usr/local/bin/python \
+		--disable-llvm-static-stdcpp \
+		--disable-docs \
 		${LLVM_ROOT_OPT}
 }
 
