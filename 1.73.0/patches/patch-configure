@@ -1,0 +1,13 @@
+--- configure.orig	2024-04-11 13:34:39 UTC
++++ configure
+@@ -11,6 +11,10 @@ try() {
+     fi
+ }
+ 
++try python3.8 "$@"
++try python3.9 "$@"
++try python3.10 "$@"
++try python3.11 "$@"
+ try python3 "$@"
+ try python2.7 "$@"
+ try python27 "$@"
