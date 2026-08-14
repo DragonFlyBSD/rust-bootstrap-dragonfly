@@ -92,7 +92,9 @@ BASH=bash
 TARGET=x86_64-unknown-dragonfly
 DEST_INSTALL=$DEST/install
 COMPONENTS="cargo-${CARGO_BOOTSTRAP_VERSION} rust-std-${RUSTC_BOOTSTRAP_VERSION} rustc-${RUSTC_BOOTSTRAP_VERSION}"
-BOOTSTRAP_URL="https://leaf.dragonflybsd.org/~tuxillo/archive/rust/${RUSTC_BOOTSTRAP_VERSION}"
+# Bootstrap toolchain (cargo/rustc/rust-std) fetch bases, tried in order: old
+# archive first, then the new one. download() keeps the first that has the file.
+BOOTSTRAP_URL="https://leaf.dragonflybsd.org/~tuxillo/archive/rust/${RUSTC_BOOTSTRAP_VERSION} https://avalon.dragonflybsd.org/misc/distfiles/rust-bootstrap/${RUSTC_BOOTSTRAP_VERSION}"
 
 if [ "${CONFIGURE_CARGO_STATIC_FLAGS}" = "" ]; then
 	CONFIGURE_CARGO_STATIC_FLAGS=--enable-cargo-openssl-static
@@ -147,8 +149,12 @@ download() {
 		echo "$1 exists in $2"
 		cp $2/$1 $3/$1
 	else
-		echo "download: $1 from $4 and store into $3"
-		fetch -o $3/$1 $4/$1
+		# $4 holds one or more base URLs; try them in order, keep the first hit.
+		for _base in $4; do
+			echo "download: $1 from $_base"
+			fetch -o $3/$1 $_base/$1 && break
+		done
+		test -s $3/$1 || { echo "download failed: $1 (tried: $4)" >&2; exit 1; }
 	fi
 
 	cksum=`sha256 -q $3/$1`
@@ -214,7 +220,7 @@ extract() {
 
 	for component in ${COMPONENTS}; do
 		echo "DOWNLOAD COMPONENT: ${component}"
-		download $component-${TARGET}.tar.xz /usr/distfiles $DEST ${BOOTSTRAP_URL}
+		download $component-${TARGET}.tar.xz /usr/distfiles $DEST "${BOOTSTRAP_URL}"
 
 		echo "INSTALL COMPONENT: ${component}"
 		tar xvzf $DEST/$component-${TARGET}.tar.xz -C $DEST/tmp  || exit 1
